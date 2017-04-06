@@ -16,7 +16,7 @@ var token;
 
 try {
 	let tk = fs.readFileSync('./token').toString();
-	if (tk.indexOf('mfa') === 0) {
+	if (tk.indexOf('-') !== -1) {
 		token = tk;
 		let cipher = crypto.createCipher('aes-256-cbc', key);
 		let encrypted = cipher.update(tk, 'utf8', 'hex') + cipher.final('hex');
