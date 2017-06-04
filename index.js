@@ -36,6 +36,7 @@ try {
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const moment = require('moment');
+const path = require('path');
 
 client.on('ready', () => {
 	console.log(`Logged in as ${client.user.username}!`);
@@ -43,6 +44,27 @@ client.on('ready', () => {
 
 client.on('message', msg => {
 	if (msg.author.id != client.user.id) {
+		return;
+	}
+	if(msg.content.charAt('0') == '=') {
+		msg.delete();
+		var id = msg.content.substr(1).toLowerCase();
+		var p;
+		for(var ext of ['png', 'jpg', 'gif']) {
+			var p = path.join(process.cwd(), 'meme', id + '.' + ext);
+			try {
+				fs.statSync(p);
+				break;
+			} catch(ignored){};
+		}
+		try {
+			fs.statSync(p);
+			msg.channel.send({
+				file: p
+			});
+		} catch(e) {
+			console.error(e.message);
+		}
 		return;
 	}
 	var reply = msg.content.match(/^>>(\d+)(#[0123456789abcdefABCDEF]{6})?\b(.*)/);
@@ -54,7 +76,7 @@ client.on('message', msg => {
 			rich.setAuthor(orig.member.displayName || orig.author.username, orig.author.avatarURL);
 			rich.setColor(reply[2] || '#222222');
 			rich.setDescription(orig.content);
-			rich.setFooter(moment(orig.createdAt).format('YYYY-MM-DD HH:mm:ss Z'));
+			rich.setTimestamp(orig.createdAt);
 
 			msg.delete();
 			msg.channel.sendEmbed(rich);
